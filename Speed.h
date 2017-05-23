@@ -14,7 +14,7 @@
 	NSString *name;
 }
 
-@property (readwrite, retain) NSString *name;
+@property (readwrite, strong) NSString *name;
 @property (readwrite, assign) NSInteger speed;
 
 -(id)initWithName:(NSString *)name speed:(NSInteger)speed;

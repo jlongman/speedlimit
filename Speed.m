@@ -21,16 +21,12 @@
 	return self;
 }
 
--(void)dealloc {
-	[name release];
-	[super dealloc];
-}
 
 -(NSString *)description {
 	return [NSString stringWithFormat:@"%ldk (%@)", self.speed, self.name];
 }
 
 +(Speed *)speedWithName:(NSString *)aName speed:(NSInteger)aSpeed {
-	return [[[Speed alloc] initWithName:aName speed:aSpeed] autorelease];
+	return [[Speed alloc] initWithName:aName speed:aSpeed];
 }
 @end

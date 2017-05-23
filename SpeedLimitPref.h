@@ -36,25 +36,25 @@
 	SFAuthorizationView *authorizationView;
 }
 
-@property (readwrite, retain) NSString *delay;
-@property (readwrite, retain) NSString *hosts;
-@property (readwrite, retain) Speed *speed;
-@property (readwrite, retain) NSArray *rules;
+@property (readwrite, strong) NSString *delay;
+@property (readwrite, strong) NSString *hosts;
+@property (readwrite, strong) Speed *speed;
+@property (readwrite, strong) NSArray *rules;
 @property (readwrite, assign) BOOL slow;
 @property (readwrite, assign) double packetLossRatio;
 @property (readwrite, assign) BOOL packetLossErrorSuppress;
 
-@property (readwrite, retain) IBOutlet NSArrayController *speedsController;
-@property (readwrite, retain) IBOutlet NSArrayController *portsController;
-@property (readwrite, retain) IBOutlet NSTextField *speedLimitLabel;
-@property (readwrite, retain) IBOutlet NSTableView *portsView;
-@property (readwrite, retain) IBOutlet NSTextField *hostsTextField;
-@property (readwrite, retain) IBOutlet NSTextField *delayTextField;
-@property (readwrite, retain) IBOutlet NSPopUpButton *speedsPopUpButton;
-@property (readwrite, retain) IBOutlet NSButton *addButton;
-@property (readwrite, retain) IBOutlet NSButton *removeButton;
-@property (readwrite, retain) IBOutlet NSButton *startStopButton;
-@property (readwrite, retain) IBOutlet SFAuthorizationView *authorizationView;
+@property (readwrite, strong) IBOutlet NSArrayController *speedsController;
+@property (readwrite, strong) IBOutlet NSArrayController *portsController;
+@property (readwrite, strong) IBOutlet NSTextField *speedLimitLabel;
+@property (readwrite, strong) IBOutlet NSTableView *portsView;
+@property (readwrite, strong) IBOutlet NSTextField *hostsTextField;
+@property (readwrite, strong) IBOutlet NSTextField *delayTextField;
+@property (readwrite, strong) IBOutlet NSPopUpButton *speedsPopUpButton;
+@property (readwrite, strong) IBOutlet NSButton *addButton;
+@property (readwrite, strong) IBOutlet NSButton *removeButton;
+@property (readwrite, strong) IBOutlet NSButton *startStopButton;
+@property (readwrite, strong) IBOutlet SFAuthorizationView *authorizationView;
 
 -(void) mainViewDidLoad;
 

@@ -13,7 +13,7 @@
     NSNumber *port;
 }
 
-@property (readwrite, retain) NSNumber *port;
+@property (readwrite, strong) NSNumber *port;
 
 - (id)initWithPort:(int)portValue;
 
