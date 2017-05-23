@@ -3,62 +3,61 @@ ACTION=$1
 shift
 
 if [[ "$ACTION" == "start" ]]; then
-	if [[ $# -lt 4 ]]; then
-		echo "Usage: $0 start [kps] [delay] [plr] [plr-suppress] [comma-separated hosts|\"any\"] [port1] <port2> .. <portn>"
-	fi
-	SPEED="$1Kbit/s"
-	shift
-	
-	DELAY="$1ms"
-	shift
-	
-	PLR="$1"
-	shift
-	
-	PLR_SUPPRESS="$1"
-	shift
-	
-	if [[ "$PLR_SUPPRESS" == "yes" ]]; then
-		PLR_SUPPRESS="noerror"
-	else
-		PLR_SUPPRESS=""
-	fi
-	
-	HOSTS="${1//,/ }"
-	if [[ "$HOSTS" == "" ]]; then
-		HOSTS="any"
-	fi
-	shift
-	
-	PIPE=100
-	while [[ -n "$1" ]]; do
-		PORT=$1
-		shift
+    if [[ $# -lt 4 ]]; then
+        echo "Usage: $0 start [kps] [delay] [plr] [plr-suppress] [comma-separated hosts|\"any\"] [port1] <port2> .. <portn>"
+    fi
 
-		for HOST in ${HOSTS[@]}; do
-			HOST=${HOST// /}
-			/sbin/ipfw add pipe $PIPE ip from $HOST $PORT to me
-			#/sbin/ipfw add pipe $PIPE ip from any $PORT to $HOST out
-			/sbin/ipfw pipe $((PIPE ++)) config $PLR_SUPPRESS bw $SPEED queue 64Kbytes delay $DELAY plr $PLR
-			/sbin/ipfw add pipe $PIPE ip from me $PORT to $HOST
-			#/sbin/ipfw add pipe $PIPE ip from any $PORT to $HOST in
-			/sbin/ipfw pipe $((PIPE ++)) config $PLR_SUPPRESS bw $SPEED queue 64Kbytes delay $DELAY plr $PLR
-		done
-	done
+    (cat /etc/pf.conf && echo "dummynet-anchor \"speedlimiter\"" && echo "anchor \"speedlimiter\"") | /sbin/pfctl -qq -f -
+
+    SPEED="$1Kbit/s"
+    shift
+
+    DELAY="$1ms"
+    shift
+
+    PLR="$1"
+    shift
+
+    PLR_SUPPRESS="$1"
+    shift
+
+    if [[ "$PLR_SUPPRESS" == "yes" ]]; then
+        PLR_SUPPRESS="noerror"
+    else
+        PLR_SUPPRESS=""
+    fi
+
+    HOSTS="${1//,/ }"
+    if [[ "$HOSTS" == "" ]]; then
+        HOSTS="any"
+    fi
+    /sbin/pfctl -q -a speedlimiter -t speedlimiter -T flush
+#    for HOST in ${HOSTS[@]}; do
+#        HOST=${HOST// /}
+#        /sbin/pfctl -q -a speedlimiter -t speedlimiter -T add $HOST
+#    done
+    shift
+    PIPE=100
+
+    foo="table <speedlimiter> { $HOSTS }"
+    while [[ -n "$1" ]]; do
+        PORT=$1
+        shift
+        foo=$(echo "$foo" && echo 'dummynet in quick proto tcp from <speedlimiter> port '"$PORT to any pipe $PIPE")
+        foo=$(echo "$foo" && echo 'dummynet out quick proto tcp from any to <speedlimiter> port '"$PORT pipe $PIPE")
+    done
+    echo "$foo" | /sbin/pfctl -qq -a speedlimiter -f -
+    /usr/sbin/dnctl pipe $PIPE config delay $DELAY bw $SPEED
+    /sbin/pfctl -q -E # enable
+    /sbin/pfctl -a speedlimiter -vvs dummynet -q | grep '^@' | cut -c 2-
 elif [[ "$ACTION" == "stop" ]]; then
-	if [[ $# -lt 2 ]]; then
-		echo "Usage: $0 stop [rule1] [rule2] <rule3> .. <rulen>"
-		exit 1
-	fi
-	
-	while [[ -n "$1" ]]; do
-		RULE=$1
-		shift
-		/sbin/ipfw delete $RULE
-	done
+    echo "" | /sbin/pfctl -a speedlimiter -qq -f -
+    /usr/sbin/dnctl flush
+    /sbin/pfctl -f /etc/pf.conf
+    /sbin/pfctl -d # disable
 elif [[ "$ACTION" == "list" ]]; then
-	/sbin/ipfw list $*
+    /sbin/pfctl -a speedlimiter -vvs dummynet -q | grep '^@' | cut -c 2-
 else
-	echo "Usage: $0 start/stop/list"
-	exit 1
+    echo "Usage: $0 start/stop/list"
+    exit 1
 fi
