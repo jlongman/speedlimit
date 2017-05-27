@@ -15,4 +15,4 @@ resulting build product .prefPane.
 
 h2. Download
 
-There is currently no binary available.
+Binaries are available in https://github.com/jlongman/speedlimit/releases/
